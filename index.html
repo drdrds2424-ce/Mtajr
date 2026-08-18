@@ -143,7 +143,7 @@
     <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div class="col-span-full glass-panel p-16 rounded-3xl text-center text-slate-400 font-medium">
         <i class="fa-solid fa-spinner animate-spin text-2xl text-emerald-400 mb-3 block"></i>
-        جاري تحميل أحدث المنتجات...
+        جاري تحميل المنتجات...
       </div>
     </div>
   </main>
@@ -275,15 +275,13 @@
     const formatIQD = (amount) => new Intl.NumberFormat('ar-IQ').format(amount) + " د.ع";
 
     document.addEventListener("DOMContentLoaded", () => {
-      // الاستماع للبيانات بفعالية عالية
-      db.ref('products').on('value', (snapshot) => {
+      db.ref('products').limitToLast(20).on('value', (snapshot) => {
         const data = snapshot.val();
-        products = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        products = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
         renderCategories();
         renderProducts();
       }, (error) => {
-        console.error(error);
-        document.getElementById("productsGrid").innerHTML = `<div class="col-span-full glass-panel p-8 text-center text-red-400">حدث خطأ في تحميل البيانات.</div>`;
+        document.getElementById("productsGrid").innerHTML = `<div class="col-span-full glass-panel p-8 text-center text-red-400">تعذر تحميل المنتجات حالياً.</div>`;
       });
     });
 
@@ -309,19 +307,19 @@
       const filtered = selectedCategory === 'all' ? products : products.filter(p => p.cat === selectedCategory);
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<div class="col-span-full glass-panel p-16 rounded-3xl text-center text-slate-400 font-medium">لا توجد منتجات في هذا القسم حالياً.</div>`;
+        grid.innerHTML = `<div class="col-span-full glass-panel p-16 rounded-3xl text-center text-slate-400 font-medium">لا توجد منتجات حالياً.</div>`;
         return;
       }
 
       grid.innerHTML = filtered.map(p => {
-        const coverImg = p.imgs ? p.imgs[0] : (p.img || '');
+        const coverImg = p.img || (p.imgs ? p.imgs[0] : '');
         const imgsCount = p.imgs ? p.imgs.length : 1;
 
         return `
           <div class="glass-card rounded-2xl p-3.5 flex flex-col justify-between gap-3 relative group">
             <div onclick="openProductDetailModal('${p.id}')" class="neon-card-wrapper cursor-pointer h-48">
               <div class="neon-card-content relative">
-                <img src="${coverImg}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                <img src="${coverImg}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
                 <span class="absolute top-2 right-2 bg-slate-950/70 backdrop-blur-md text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-800">
                   ${p.cat || 'عام'}
                 </span>
@@ -391,7 +389,7 @@
       if(exist) {
         exist.qty += 1;
       } else {
-        cart.push({ id: p.id, name: p.name, price: p.price, img: p.imgs ? p.imgs[0] : (p.img || ''), qty: 1 });
+        cart.push({ id: p.id, name: p.name, price: p.price, img: p.img || (p.imgs ? p.imgs[0] : ''), qty: 1 });
       }
 
       updateCartUI();
@@ -438,11 +436,7 @@
 
     function updateShippingFee() {
       const gov = document.getElementById("custGov").value;
-      if(gov === 'بغداد') {
-        currentShippingFee = 4000;
-      } else {
-        currentShippingFee = 5000;
-      }
+      currentShippingFee = (gov === 'بغداد') ? 4000 : 5000;
       calculateTotals();
     }
 
@@ -461,4 +455,6 @@
 
     function submitOrder(e) {
       e.preventDefault();
-      i
+      if(cart.length === 0) return alert("السلة فارغة، يرجى إضافة منتجات أولاً");
+
+      const btn = document.getEl
