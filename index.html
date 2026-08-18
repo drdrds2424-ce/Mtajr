@@ -1,282 +1,179 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>متجر النخبة | للتسوق الذكي</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; }
-    .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
-  </style>
-</head>
-<body class="text-slate-800 antialiased pb-20 md:pb-0">
+<script>
+  let products = [];
+  let cart = [];
+  let selectedCategory = "الكل";
 
-  <!-- Header -->
-  <header class="sticky top-0 z-40 glass border-b border-slate-200/80">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-black text-xl shadow-md">
-          ن
-        </div>
-        <div>
-          <h1 class="font-extrabold text-lg leading-none">متجر النخبة</h1>
-          <span class="text-xs text-emerald-600 font-bold">توصيل لكل المحافظات 🇮🇶</span>
-        </div>
-      </div>
+  const formatIQD = (amount) => new Intl.NumberFormat('ar-IQ').format(amount) + " د.ع";
 
-      <!-- Search Bar -->
-      <div class="flex-1 max-w-md relative hidden sm:block">
-        <input type="text" id="searchInput" oninput="filterProducts()" placeholder="ابحث عن منتج، ماركة..." 
-               class="w-full bg-slate-100 border-0 rounded-full py-2 pr-10 pl-4 text-sm focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all outline-none">
-        <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-slate-400"></i>
-      </div>
+  // تحميل المنتجات عند فتح الصفحة
+  document.addEventListener("DOMContentLoaded", () => {
+    loadProducts();
+    
+    // الاستماع لأي تغيير يحدث في لوحة التحكم وتحديث الواجهة فوراً
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'iq_products') {
+        loadProducts();
+      }
+    });
+  });
 
-      <!-- Cart Button -->
-      <button onclick="toggleCart()" class="relative p-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-full transition-colors">
-        <i class="fa-solid fa-bag-shopping text-xl"></i>
-        <span id="cartCount" class="absolute -top-1 -right-1 bg-emerald-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
+  function loadProducts() {
+    products = JSON.parse(localStorage.getItem('iq_products')) || [];
+    renderCategories();
+    renderProducts();
+  }
+
+  function renderCategories() {
+    const categories = ["الكل", ...new Set(products.map(p => p.cat))];
+    const container = document.getElementById("categoryContainer");
+    if (!container) return;
+    
+    container.innerHTML = categories.map(cat => `
+      <button onclick="setCategory('${cat}')" 
+              class="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}">
+        ${cat}
       </button>
-    </div>
-  </header>
+    `).join('');
+  }
 
-  <!-- Categories -->
-  <div class="max-w-7xl mx-auto px-4 mt-6">
-    <div id="categoryContainer" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-      <!-- Dynamic Categories -->
-    </div>
-  </div>
+  function setCategory(cat) {
+    selectedCategory = cat;
+    renderCategories();
+    renderProducts();
+  }
 
-  <!-- Main Grid -->
-  <main class="max-w-7xl mx-auto px-4 my-6">
-    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-      <!-- Dynamic Products -->
-    </div>
-  </main>
-
-  <!-- Cart Modal / Sidebar -->
-  <div id="cartModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden transition-opacity">
-    <div class="fixed inset-y-0 left-0 w-full max-w-md bg-white shadow-2xl flex flex-col justify-between">
-      
-      <!-- Cart Header -->
-      <div class="p-4 border-b flex items-center justify-between bg-slate-50">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-cart-flatbed text-emerald-600 text-lg"></i>
-          <h2 class="font-bold text-lg">سلة الشراء</h2>
-        </div>
-        <button onclick="toggleCart()" class="text-slate-400 hover:text-slate-600 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-
-      <!-- Cart Items -->
-      <div id="cartItems" class="flex-1 overflow-y-auto p-4 divide-y">
-        <!-- Items inserted via JS -->
-      </div>
-
-      <!-- Checkout Form -->
-      <div class="p-4 border-t bg-slate-50 space-y-3">
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between text-slate-500">
-            <span>مجموع المنتجات:</span>
-            <span id="subtotal">0 د.ع</span>
-          </div>
-          <div class="flex justify-between text-slate-500">
-            <span>أجور التوصيل:</span>
-            <span id="shippingFee">5,000 د.ع</span>
-          </div>
-          <div class="flex justify-between font-bold text-base text-slate-800 pt-2 border-t">
-            <span>المبلغ الكلي:</span>
-            <span id="totalAmount" class="text-emerald-600">0 د.ع</span>
-          </div>
-        </div>
-
-        <form id="checkoutForm" onsubmit="handleCheckout(event)" class="space-y-2.5 pt-2">
-          <input type="text" id="custName" required placeholder="الاسم الكامل" class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-          <input type="tel" id="custPhone" required pattern="07[3-9][0-9]{8}" placeholder="رقم الهاتف (مثال: 07701234567)" class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-          
-          <select id="custGov" onchange="updateShipping()" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-            <option value="">اختر المحافظة...</option>
-            <option value="بغداد" data-fee="5000">بغداد (5,000 د.ع)</option>
-            <option value="البصرة" data-fee="6000">البصرة (6,000 د.ع)</option>
-            <option value="أربيل" data-fee="6000">أربيل (6,000 د.ع)</option>
-            <option value="النجف الأشرف" data-fee="5000">النجف الأشرف (5,000 د.ع)</option>
-            <option value="كربلاء المقدسة" data-fee="5000">كربلاء المقدسة (5,000 د.ع)</option>
-            <option value="بابل" data-fee="5000">بابل (5,000 د.ع)</option>
-            <option value="بقية المحافظات" data-fee="6000">بقية المحافظات (6,000 د.ع)</option>
-          </select>
-
-          <input type="text" id="custAddress" required placeholder="العنوان والتفاصيل (المنطقة، أقرب نقطة دالة)" class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-          
-          <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2">
-            <i class="fa-solid fa-paper-plane"></i>
-            تأكيد الطلب
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let products = JSON.parse(localStorage.getItem('iq_products')) || [];
-    let cart = [];
-    let selectedCategory = "الكل";
-
-    const formatIQD = (amount) => new Intl.NumberFormat('ar-IQ').format(amount) + " د.ع";
-
-    document.addEventListener("DOMContentLoaded", () => {
-      renderCategories();
-      renderProducts();
+  function renderProducts() {
+    const grid = document.getElementById("productGrid");
+    if (!grid) return;
+    
+    const searchInput = document.getElementById("searchInput");
+    const query = searchInput ? searchInput.value.toLowerCase() : "";
+    
+    const filtered = products.filter(p => {
+      const matchesCat = selectedCategory === "الكل" || p.cat === selectedCategory;
+      const matchesSearch = p.name.toLowerCase().includes(query);
+      return matchesCat && matchesSearch;
     });
 
-    function renderCategories() {
-      const categories = ["الكل", ...new Set(products.map(p => p.cat))];
-      const container = document.getElementById("categoryContainer");
-      container.innerHTML = categories.map(cat => `
-        <button onclick="setCategory('${cat}')" 
-                class="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}">
-          ${cat}
-        </button>
-      `).join('');
+    if(filtered.length === 0) {
+      grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">لا توجد منتجات متوفرة حالياً. أضف منتجات من لوحة التحكم.</div>`;
+      return;
     }
 
-    function setCategory(cat) {
-      selectedCategory = cat;
-      renderCategories();
-      renderProducts();
-    }
-
-    function renderProducts() {
-      const grid = document.getElementById("productGrid");
-      const query = document.getElementById("searchInput").value.toLowerCase();
-      
-      const filtered = products.filter(p => {
-        const matchesCat = selectedCategory === "الكل" || p.cat === selectedCategory;
-        const matchesSearch = p.name.toLowerCase().includes(query);
-        return matchesCat && matchesSearch;
-      });
-
-      if(filtered.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">لا توجد منتجات متوفرة حالياً.</div>`;
-        return;
-      }
-
-      grid.innerHTML = filtered.map(p => `
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
-          <div class="relative overflow-hidden aspect-square bg-slate-100">
-            <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-2 right-2 bg-slate-900/60 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${p.cat}</span>
+    grid.innerHTML = filtered.map(p => `
+      <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+        <div class="relative overflow-hidden aspect-square bg-slate-100">
+          <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+          <span class="absolute top-2 right-2 bg-slate-900/60 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${p.cat}</span>
+        </div>
+        <div class="p-3.5 flex-1 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2">${p.name}</h3>
+            <p class="text-emerald-600 font-extrabold mt-1 text-sm sm:text-base">${formatIQD(p.price)}</p>
           </div>
-          <div class="p-3.5 flex-1 flex flex-col justify-between">
+          <button onclick="addToCart(${p.id})" class="mt-3 w-full py-2 bg-slate-900 hover:bg-emerald-600 text-white rounded-xl text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-xs"></i> إضـافة للسـلة
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterProducts() { renderProducts(); }
+
+  function addToCart(id) {
+    const item = cart.find(i => i.id === id);
+    if(item) { item.qty++; } 
+    else {
+      const product = products.find(p => p.id === id);
+      if(product) cart.push({ ...product, qty: 1 });
+    }
+    updateCartUI();
+  }
+
+  function toggleCart() {
+    document.getElementById("cartModal").classList.toggle("hidden");
+  }
+
+  function updateCartUI() {
+    document.getElementById("cartCount").innerText = cart.reduce((acc, item) => acc + item.qty, 0);
+    const container = document.getElementById("cartItems");
+    
+    if(cart.length === 0) {
+      container.innerHTML = `<p class="text-center text-slate-400 my-8 text-sm">السلة فارغة حالياً</p>`;
+    } else {
+      container.innerHTML = cart.map(item => `
+        <div class="py-3 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-3">
+            <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover border">
             <div>
-              <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2">${p.name}</h3>
-              <p class="text-emerald-600 font-extrabold mt-1 text-sm sm:text-base">${formatIQD(p.price)}</p>
+              <h4 class="font-bold text-sm text-slate-800 line-clamp-1">${item.name}</h4>
+              <p class="text-xs text-emerald-600 font-bold">${formatIQD(item.price)}</p>
             </div>
-            <button onclick="addToCart(${p.id})" class="mt-3 w-full py-2 bg-slate-900 hover:bg-emerald-600 text-white rounded-xl text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-plus text-xs"></i> إضـافة للسـلة
-            </button>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+            <button onclick="changeQty(${item.id}, -1)" class="w-6 h-6 bg-white rounded shadow-sm text-slate-600 font-bold">-</button>
+            <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
+            <button onclick="changeQty(${item.id}, 1)" class="w-6 h-6 bg-white rounded shadow-sm text-slate-600 font-bold">+</button>
           </div>
         </div>
       `).join('');
     }
+    updateShipping();
+  }
 
-    function filterProducts() { renderProducts(); }
-
-    function addToCart(id) {
-      const item = cart.find(i => i.id === id);
-      if(item) { item.qty++; } 
-      else {
-        const product = products.find(p => p.id === id);
-        cart.push({ ...product, qty: 1 });
-      }
-      updateCartUI();
+  function changeQty(id, delta) {
+    const item = cart.find(i => i.id === id);
+    if(item) {
+      item.qty += delta;
+      if(item.qty <= 0) cart = cart.filter(i => i.id !== id);
     }
+    updateCartUI();
+  }
 
-    function toggleCart() {
-      document.getElementById("cartModal").classList.toggle("hidden");
-    }
+  function updateShipping() {
+    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    const govSelect = document.getElementById("custGov");
+    const selectedOption = govSelect ? govSelect.options[govSelect.selectedIndex] : null;
+    const shippingFee = selectedOption && selectedOption.dataset.fee ? parseInt(selectedOption.dataset.fee) : 5000;
 
-    function updateCartUI() {
-      document.getElementById("cartCount").innerText = cart.reduce((acc, item) => acc + item.qty, 0);
-      const container = document.getElementById("cartItems");
-      
-      if(cart.length === 0) {
-        container.innerHTML = `<p class="text-center text-slate-400 my-8 text-sm">السلة فارغة حالياً</p>`;
-      } else {
-        container.innerHTML = cart.map(item => `
-          <div class="py-3 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-3">
-              <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover border">
-              <div>
-                <h4 class="font-bold text-sm text-slate-800 line-clamp-1">${item.name}</h4>
-                <p class="text-xs text-emerald-600 font-bold">${formatIQD(item.price)}</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
-              <button onclick="changeQty(${item.id}, -1)" class="w-6 h-6 bg-white rounded shadow-sm text-slate-600 font-bold">-</button>
-              <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
-              <button onclick="changeQty(${item.id}, 1)" class="w-6 h-6 bg-white rounded shadow-sm text-slate-600 font-bold">+</button>
-            </div>
-          </div>
-        `).join('');
-      }
-      updateShipping();
-    }
+    document.getElementById("subtotal").innerText = formatIQD(subtotal);
+    document.getElementById("shippingFee").innerText = formatIQD(shippingFee);
+    document.getElementById("totalAmount").innerText = formatIQD(cart.length > 0 ? subtotal + shippingFee : 0);
+  }
 
-    function changeQty(id, delta) {
-      const item = cart.find(i => i.id === id);
-      if(item) {
-        item.qty += delta;
-        if(item.qty <= 0) cart = cart.filter(i => i.id !== id);
-      }
-      updateCartUI();
-    }
+  function handleCheckout(e) {
+    e.preventDefault();
+    if(cart.length === 0) return alert("السلة فارغة!");
 
-    function updateShipping() {
-      const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-      const govSelect = document.getElementById("custGov");
-      const selectedOption = govSelect.options[govSelect.selectedIndex];
-      const shippingFee = selectedOption && selectedOption.dataset.fee ? parseInt(selectedOption.dataset.fee) : 5000;
+    const govSelect = document.getElementById("custGov");
+    const shippingFee = parseInt(govSelect.options[govSelect.selectedIndex].dataset.fee || 5000);
+    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
 
-      document.getElementById("subtotal").innerText = formatIQD(subtotal);
-      document.getElementById("shippingFee").innerText = formatIQD(shippingFee);
-      document.getElementById("totalAmount").innerText = formatIQD(cart.length > 0 ? subtotal + shippingFee : 0);
-    }
+    const order = {
+      id: "ORD-" + Math.floor(100000 + Math.random() * 900000),
+      date: new Date().toISOString(),
+      customer: {
+        name: document.getElementById("custName").value,
+        phone: document.getElementById("custPhone").value,
+        gov: document.getElementById("custGov").value,
+        address: document.getElementById("custAddress").value,
+      },
+      items: cart,
+      subtotal: subtotal,
+      shippingFee: shippingFee,
+      total: subtotal + shippingFee,
+      status: "جديد"
+    };
 
-    function handleCheckout(e) {
-      e.preventDefault();
-      if(cart.length === 0) return alert("السلة فارغة!");
+    let orders = JSON.parse(localStorage.getItem('iq_orders')) || [];
+    orders.unshift(order);
+    localStorage.setItem('iq_orders', JSON.stringify(orders));
 
-      const govSelect = document.getElementById("custGov");
-      const shippingFee = parseInt(govSelect.options[govSelect.selectedIndex].dataset.fee || 5000);
-      const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-
-      const order = {
-        id: "ORD-" + Math.floor(100000 + Math.random() * 900000),
-        date: new Date().toISOString(),
-        customer: {
-          name: document.getElementById("custName").value,
-          phone: document.getElementById("custPhone").value,
-          gov: document.getElementById("custGov").value,
-          address: document.getElementById("custAddress").value,
-        },
-        items: cart,
-        subtotal: subtotal,
-        shippingFee: shippingFee,
-        total: subtotal + shippingFee,
-        status: "جديد"
-      };
-
-      let orders = JSON.parse(localStorage.getItem('iq_orders')) || [];
-      orders.unshift(order);
-      localStorage.setItem('iq_orders', JSON.stringify(orders));
-
-      alert(`تم تسجيل طلبك بنجاح! رقم الطلب: ${order.id}`);
-      cart = [];
-      updateCartUI();
-      toggleCart();
-      document.getElementById("checkoutForm").reset();
-    }
-  </script>
-</body>
-</html>
+    alert(`تم تسجيل طلبك بنجاح! رقم الطلب: ${order.id}`);
+    cart = [];
+    updateCartUI();
+    toggleCart();
+    document.getElementById("checkoutForm").reset();
+  }
+</script>
