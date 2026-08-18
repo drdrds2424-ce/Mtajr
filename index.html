@@ -14,68 +14,42 @@
   <style>
     body {
       font-family: 'Tajawal', sans-serif;
-      background: radial-gradient(circle at top center, #0f172a, #020617);
+      background: #0f172a;
       color: #f8fafc;
     }
-    
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-    ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 9999px; }
 
     .glass-panel {
-      background: rgba(30, 41, 59, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .glass-card {
       background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.2s ease;
     }
 
     .glass-card:hover {
-      border-color: rgba(16, 185, 129, 0.4);
-      transform: translateY(-4px);
-      box-shadow: 0 15px 35px -10px rgba(16, 185, 129, 0.2);
-    }
-
-    .glow-btn {
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
-      transition: all 0.3s ease;
-    }
-    .glow-btn:hover {
-      box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
-      transform: scale(1.02);
-    }
-
-    .animate-pop {
-      animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    @keyframes modalPop {
-      0% { opacity: 0; transform: scale(0.92) translateY(10px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+      border-color: rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px);
     }
   </style>
 </head>
 <body class="min-h-screen pb-20 antialiased">
 
-  <!-- Header / الهيدر العائم -->
   <header class="sticky top-0 z-40 glass-panel border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-emerald-500/20">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-500 flex items-center justify-center font-black text-xl text-slate-950 shadow-lg shadow-emerald-500/20">
           <i class="fa-solid fa-bag-shopping"></i>
         </div>
         <div>
-          <h1 class="font-black text-lg bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">متجرنا الرسمي</h1>
+          <h1 class="font-black text-lg text-white">متجرنا الرسمي</h1>
           <p class="text-[10px] text-emerald-400 font-bold">تسوق بأمان - التوصيل لكل العراق 🇮🇶</p>
         </div>
       </div>
 
-      <!-- زر السلة -->
       <button onclick="toggleCartModal()" class="relative p-2.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 rounded-2xl transition flex items-center gap-2">
         <i class="fa-solid fa-cart-shopping text-emerald-400 text-lg"></i>
         <span class="text-xs font-extrabold text-white hidden sm:inline">السلة</span>
@@ -84,29 +58,23 @@
     </div>
   </header>
 
-  <!-- القسم الرئيسي للمنتجات -->
   <main class="max-w-7xl mx-auto px-4 pt-8 space-y-6">
-    
-    <!-- قسم الفئات والتصفية -->
     <div id="categoriesBar" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
       <button onclick="filterCategory('all')" class="cat-btn active px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 text-slate-950 transition flex-shrink-0">
         الكل
       </button>
     </div>
 
-    <!-- شبكة المنتجات -->
     <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div class="col-span-full glass-panel p-16 rounded-3xl text-center text-slate-400 font-medium">
         <i class="fa-solid fa-spinner animate-spin text-2xl text-emerald-400 mb-3 block"></i>
-        جاري تحميل أحدث المنتجات...
+        جاري تحميل المنتجات...
       </div>
     </div>
-
   </main>
 
-  <!-- Modal معاينة المنتجات وال صور المتعددة -->
   <div id="productDetailModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto border border-slate-700/50 animate-pop">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto border border-slate-700/50">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 id="modalProductName" class="font-black text-xl text-white truncate">تفاصيل المنتج</h3>
         <button onclick="closeProductDetailModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition">
@@ -115,12 +83,10 @@
       </div>
 
       <div class="space-y-4">
-        <!-- عرض الصورة المكبرة والمعرض -->
-        <div class="relative w-full h-72 rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
+        <div class="h-72 rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
           <img id="modalMainImg" src="" class="w-full h-full object-contain">
         </div>
         
-        <!-- المصغرات للصور -->
         <div id="modalThumbnails" class="flex gap-2 overflow-x-auto p-1"></div>
 
         <div class="space-y-2">
@@ -131,17 +97,15 @@
           <p id="modalProductDesc" class="text-sm text-slate-300 leading-relaxed bg-slate-900/50 p-4 rounded-xl border border-slate-800/80"></p>
         </div>
 
-        <button id="modalAddToCartBtn" class="glow-btn w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl transition flex items-center justify-center gap-2">
+        <button id="modalAddToCartBtn" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-cart-plus"></i> إضافة إلى السلة
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal سلة المشتريات وإكمال الطلب -->
   <div id="cartModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-slate-700/50 animate-pop">
-      
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-slate-700/50">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 class="font-black text-xl text-white flex items-center gap-2">
           <i class="fa-solid fa-basket-shopping text-emerald-400"></i> سلة المشتريات
@@ -151,10 +115,8 @@
         </button>
       </div>
 
-      <!-- قائمة العناصر -->
       <div id="cartItemsContainer" class="space-y-3 max-h-56 overflow-y-auto pl-1"></div>
 
-      <!-- استمارة الزبون -->
       <form id="checkoutForm" onsubmit="submitOrder(event)" class="space-y-3 pt-3 border-t border-slate-800">
         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">معلومات التوصيل</h4>
 
@@ -192,7 +154,6 @@
           <input type="text" id="custAddress" required placeholder="المنطقة / تفاصيل العنوان" class="w-full px-3 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
         </div>
 
-        <!-- خلاصة السعر والتوصيل -->
         <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1.5 text-xs">
           <div class="flex justify-between text-slate-400">
             <span>المجموع الفرعي:</span>
@@ -208,7 +169,7 @@
           </div>
         </div>
 
-        <button type="submit" id="btnSubmitOrder" class="glow-btn w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl transition flex items-center justify-center gap-2">
+        <button type="submit" id="btnSubmitOrder" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-paper-plane"></i> تأكيد وإرسال الطلب
         </button>
       </form>
@@ -232,16 +193,18 @@
     let products = [];
     let cart = [];
     let selectedCategory = 'all';
-    let currentShippingFee = 5000; // افتراضي لكافة المحافظات
+    let currentShippingFee = 5000;
 
     const formatIQD = (amount) => new Intl.NumberFormat('ar-IQ').format(amount) + " د.ع";
 
     document.addEventListener("DOMContentLoaded", () => {
-      db.ref('products').on('value', (snapshot) => {
+      db.ref('products').limitToLast(20).on('value', (snapshot) => {
         const data = snapshot.val();
-        products = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        products = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
         renderCategories();
         renderProducts();
+      }, (error) => {
+        document.getElementById("productsGrid").innerHTML = `<div class="col-span-full glass-panel p-8 text-center text-red-400">تعذر تحميل المنتجات حالياً.</div>`;
       });
     });
 
@@ -267,26 +230,20 @@
       const filtered = selectedCategory === 'all' ? products : products.filter(p => p.cat === selectedCategory);
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<div class="col-span-full glass-panel p-16 rounded-3xl text-center text-slate-400 font-medium">لا توجد منتجات في هذا القسم حالياً.</div>`;
+        grid.innerHTML = `<div class="col-span-full glass-panel p-16 rounded-3xl text-center text-slate-400 font-medium">لا توجد منتجات حالياً.</div>`;
         return;
       }
 
       grid.innerHTML = filtered.map(p => {
-        const coverImg = p.imgs ? p.imgs[0] : (p.img || '');
-        const imgsCount = p.imgs ? p.imgs.length : 1;
+        const coverImg = p.img || (p.imgs ? p.imgs[0] : '');
 
         return `
-          <div class="glass-card rounded-2xl p-3.5 flex flex-col justify-between gap-3 relative group">
-            <div onclick="openProductDetailModal('${p.id}')" class="relative w-full h-48 rounded-xl overflow-hidden bg-slate-900 cursor-pointer">
-              <img src="${coverImg}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-              <span class="absolute top-2 right-2 bg-slate-950/70 backdrop-blur-md text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-800">
+          <div class="glass-card rounded-2xl p-3.5 flex flex-col justify-between gap-3 relative">
+            <div onclick="openProductDetailModal('${p.id}')" class="cursor-pointer h-48 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 relative">
+              <img src="${coverImg}" class="w-full h-full object-cover hover:scale-105 transition duration-300" loading="lazy">
+              <span class="absolute top-2 right-2 bg-slate-950/70 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-800">
                 ${p.cat || 'عام'}
               </span>
-              ${imgsCount > 1 ? `
-                <span class="absolute bottom-2 left-2 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-                  <i class="fa-solid fa-images text-emerald-400"></i> ${imgsCount}
-                </span>
-              ` : ''}
             </div>
 
             <div class="space-y-1">
@@ -295,7 +252,7 @@
             </div>
 
             <div class="flex gap-2 pt-1">
-              <button onclick="addToCart('${p.id}')" class="glow-btn w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+              <button onclick="addToCart('${p.id}')" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs transition flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-cart-plus"></i> إضافة للسلة
               </button>
             </div>
@@ -318,8 +275,10 @@
       mainImg.src = imgs[0] || '';
 
       const thumbsContainer = document.getElementById("modalThumbnails");
-      thumbsContainer.innerHTML = imgs.map((img, idx) => `
-        <img src="${img}" onclick="document.getElementById('modalMainImg').src='${img}'" class="w-14 h-14 object-cover rounded-xl border border-slate-700 cursor-pointer hover:border-emerald-500 transition flex-shrink-0">
+      thumbsContainer.innerHTML = imgs.map((img) => `
+        <div class="cursor-pointer flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border border-slate-800" onclick="document.getElementById('modalMainImg').src='${img}'">
+          <img src="${img}" class="w-full h-full object-cover">
+        </div>
       `).join('');
 
       const btn = document.getElementById("modalAddToCartBtn");
@@ -343,7 +302,7 @@
       if(exist) {
         exist.qty += 1;
       } else {
-        cart.push({ id: p.id, name: p.name, price: p.price, img: p.imgs ? p.imgs[0] : (p.img || ''), qty: 1 });
+        cart.push({ id: p.id, name: p.name, price: p.price, img: p.img || (p.imgs ? p.imgs[0] : ''), qty: 1 });
       }
 
       updateCartUI();
@@ -390,11 +349,7 @@
 
     function updateShippingFee() {
       const gov = document.getElementById("custGov").value;
-      if(gov === 'بغداد') {
-        currentShippingFee = 4000;
-      } else {
-        currentShippingFee = 5000;
-      }
+      currentShippingFee = (gov === 'بغداد') ? 4000 : 5000;
       calculateTotals();
     }
 
@@ -436,7 +391,17 @@
       };
 
       db.ref('orders').push(orderData).then(() => {
-        alert("تم إرسال طلبك بنجاح! سنتواصل معك قريباً لتأكيد التوصيل.");
+        alert("تم إرسال طلبك بنجاح!");
         cart = [];
         updateCartUI();
-       
+        toggleCartModal();
+        document.getElementById("checkoutForm").reset();
+      }).finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> تأكيد وإرسال الطلب`;
+      });
+    }
+  </script>
+</body>
+</html>
+
