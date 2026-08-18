@@ -59,7 +59,6 @@
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* --- تأثير إطار النيون التفاعلي المتحرك --- */
     .neon-card-wrapper {
       position: relative;
       border-radius: 0.75rem;
@@ -114,7 +113,6 @@
 </head>
 <body class="min-h-screen pb-20 antialiased">
 
-  <!-- Header / الهيدر العائم -->
   <header class="sticky top-0 z-40 glass-panel border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -127,7 +125,6 @@
         </div>
       </div>
 
-      <!-- زر السلة -->
       <button onclick="toggleCartModal()" class="relative p-2.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 rounded-2xl transition flex items-center gap-2">
         <i class="fa-solid fa-cart-shopping text-emerald-400 text-lg"></i>
         <span class="text-xs font-extrabold text-white hidden sm:inline">السلة</span>
@@ -136,27 +133,21 @@
     </div>
   </header>
 
-  <!-- القسم الرئيسي للمنتجات -->
   <main class="max-w-7xl mx-auto px-4 pt-8 space-y-6">
-    
-    <!-- قسم الفئات والتصفية -->
     <div id="categoriesBar" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
       <button onclick="filterCategory('all')" class="cat-btn active px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 text-slate-950 transition flex-shrink-0">
         الكل
       </button>
     </div>
 
-    <!-- شبكة المنتجات -->
     <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div class="col-span-full glass-panel p-16 rounded-3xl text-center text-slate-400 font-medium">
         <i class="fa-solid fa-spinner animate-spin text-2xl text-emerald-400 mb-3 block"></i>
         جاري تحميل أحدث المنتجات...
       </div>
     </div>
-
   </main>
 
-  <!-- Modal معاينة المنتجات وال صور المتعددة -->
   <div id="productDetailModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto border border-slate-700/50 animate-pop">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -167,14 +158,12 @@
       </div>
 
       <div class="space-y-4">
-        <!-- عرض الصورة المكبرة مع إطار نيون داخل المودال -->
         <div class="neon-card-wrapper h-72">
           <div class="neon-card-content relative">
             <img id="modalMainImg" src="" class="w-full h-full object-contain">
           </div>
         </div>
         
-        <!-- المصغرات للصور -->
         <div id="modalThumbnails" class="flex gap-2 overflow-x-auto p-1"></div>
 
         <div class="space-y-2">
@@ -192,10 +181,8 @@
     </div>
   </div>
 
-  <!-- Modal سلة المشتريات وإكمال الطلب -->
   <div id="cartModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="glass-panel w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-slate-700/50 animate-pop">
-      
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 class="font-black text-xl text-white flex items-center gap-2">
           <i class="fa-solid fa-basket-shopping text-emerald-400"></i> سلة المشتريات
@@ -205,10 +192,8 @@
         </button>
       </div>
 
-      <!-- قائمة العناصر -->
       <div id="cartItemsContainer" class="space-y-3 max-h-56 overflow-y-auto pl-1"></div>
 
-      <!-- استمارة الزبون -->
       <form id="checkoutForm" onsubmit="submitOrder(event)" class="space-y-3 pt-3 border-t border-slate-800">
         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">معلومات التوصيل</h4>
 
@@ -246,7 +231,6 @@
           <input type="text" id="custAddress" required placeholder="المنطقة / تفاصيل العنوان" class="w-full px-3 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
         </div>
 
-        <!-- خلاصة السعر والتوصيل -->
         <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1.5 text-xs">
           <div class="flex justify-between text-slate-400">
             <span>المجموع الفرعي:</span>
@@ -291,11 +275,15 @@
     const formatIQD = (amount) => new Intl.NumberFormat('ar-IQ').format(amount) + " د.ع";
 
     document.addEventListener("DOMContentLoaded", () => {
+      // الاستماع للبيانات بفعالية عالية
       db.ref('products').on('value', (snapshot) => {
         const data = snapshot.val();
         products = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderCategories();
         renderProducts();
+      }, (error) => {
+        console.error(error);
+        document.getElementById("productsGrid").innerHTML = `<div class="col-span-full glass-panel p-8 text-center text-red-400">حدث خطأ في تحميل البيانات.</div>`;
       });
     });
 
@@ -331,8 +319,6 @@
 
         return `
           <div class="glass-card rounded-2xl p-3.5 flex flex-col justify-between gap-3 relative group">
-            
-            <!-- حاوية إطار النيون المتحرك حول صورة المنتج -->
             <div onclick="openProductDetailModal('${p.id}')" class="neon-card-wrapper cursor-pointer h-48">
               <div class="neon-card-content relative">
                 <img src="${coverImg}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
@@ -465,4 +451,14 @@
       const total = cart.length > 0 ? subtotal + currentShippingFee : 0;
 
       document.getElementById("subtotalPrice").innerText = formatIQD(subtotal);
-      document.getElementById("shippingPrice"
+      document.getElementById("shippingPrice").innerText = formatIQD(cart.length > 0 ? currentShippingFee : 0);
+      document.getElementById("totalPrice").innerText = formatIQD(total);
+    }
+
+    function toggleCartModal() {
+      document.getElementById("cartModal").classList.toggle("hidden");
+    }
+
+    function submitOrder(e) {
+      e.preventDefault();
+      i
